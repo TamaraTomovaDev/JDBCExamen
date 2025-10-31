@@ -1,29 +1,22 @@
 package app.menus;
 
+import app.controllers.PostTopicController;
 import models.PostTopic;
-import services.PostService;
-import services.PostTopicService;
-import services.TopicService;
-import utils.InputHelper;
 import utils.DisplayHelper;
+import utils.InputHelper;
 
 import java.util.List;
 import java.util.Scanner;
 
 public class KoppelingMenu {
     private final Scanner scanner;
-    private final PostTopicService postTopicService;
-    private final PostService postService;
-    private final TopicService topicService;
+    private final PostTopicController koppelingController;
 
-    public KoppelingMenu(Scanner scanner, PostTopicService postTopicService, PostService postService, TopicService topicService) {
+    public KoppelingMenu(Scanner scanner, PostTopicController koppelingController) {
         this.scanner = scanner;
-        this.postTopicService = postTopicService;
-        this.postService = postService;
-        this.topicService = topicService;
+        this.koppelingController = koppelingController;
     }
 
-    // Toont het menu en handelt gebruikerskeuzes af.
     public void show() {
         boolean back = false;
         while (!back) {
@@ -44,34 +37,16 @@ public class KoppelingMenu {
         }
     }
 
-    // Voegt een nieuwe koppeling toe tussen een post en een topic.
     private void addKoppeling() {
         int postId = InputHelper.getIntInput(scanner, "Post ID: ");
         int topicId = InputHelper.getIntInput(scanner, "Topic ID: ");
 
-        boolean postExists = postService.getAllPosts().stream().anyMatch(p -> p.getId() == postId);
-        boolean topicExists = topicService.getAllTopics().stream().anyMatch(t -> t.getId() == topicId);
-
-        if (!postExists) {
-            System.out.println("Kan geen koppeling toevoegen: Post ID bestaat niet.");
-            return;
-        }
-        if (!topicExists) {
-            System.out.println("Kan geen koppeling toevoegen: Topic ID bestaat niet.");
-            return;
-        }
-
-        PostTopic pt = new PostTopic();
-        pt.setPostId(postId);
-        pt.setTopicId(topicId);
-
-        long id = postTopicService.addPostTopic(pt);
+        long id = koppelingController.createKoppeling(postId, topicId);
         System.out.println(id == -1 ? "Fout bij toevoegen van koppeling." : "Koppeling toegevoegd met ID: " + id);
     }
 
-    // Toont alle bestaande koppelingen tussen posts en topics.
     private void listKoppelingen() {
-        List<PostTopic> koppelingen = postTopicService.getAllPostTopics();
+        List<PostTopic> koppelingen = koppelingController.getAllKoppelingen();
         if (koppelingen.isEmpty()) {
             System.out.println("Geen koppelingen gevonden.");
         } else {
@@ -79,10 +54,9 @@ public class KoppelingMenu {
         }
     }
 
-    // Verwijdert een koppeling op basis van ID.
     private void deleteKoppeling() {
         int id = InputHelper.getIntInput(scanner, "ID van koppeling om te verwijderen: ");
-        boolean success = postTopicService.deletePostTopic(id);
-        System.out.println(success ? "Koppeling verwijderd." : " Verwijderen mislukt.");
+        boolean success = koppelingController.deleteKoppeling(id);
+        System.out.println(success ? "Koppeling verwijderd." : "Verwijderen mislukt.");
     }
 }

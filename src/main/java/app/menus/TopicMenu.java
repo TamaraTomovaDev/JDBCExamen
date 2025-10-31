@@ -1,9 +1,7 @@
 package app.menus;
 
+import app.controllers.TopicController;
 import models.Topic;
-import services.PostTopicService;
-import services.TopicService;
-import utils.CascadeWarningHelper;
 import utils.DisplayHelper;
 import utils.InputHelper;
 
@@ -12,16 +10,13 @@ import java.util.Scanner;
 
 public class TopicMenu {
     private final Scanner scanner;
-    private final TopicService topicService;
-    private final PostTopicService postTopicService;
+    private final TopicController topicController;
 
-    public TopicMenu(Scanner scanner, TopicService topicService, PostTopicService postTopicService) {
+    public TopicMenu(Scanner scanner, TopicController topicController) {
         this.scanner = scanner;
-        this.topicService = topicService;
-        this.postTopicService = postTopicService;
+        this.topicController = topicController;
     }
 
-    // Toont het hoofdmenu voor topicsbeheer.
     public void show() {
         boolean back = false;
         while (!back) {
@@ -44,22 +39,16 @@ public class TopicMenu {
         }
     }
 
-    // Voegt een nieuw topic toe na invoer van naam en slug.
     private void addTopic() {
         String name = InputHelper.getStringInput(scanner, "Naam: ");
         String slug = InputHelper.getStringInput(scanner, "Slug: ");
 
-        Topic topic = new Topic();
-        topic.setName(name);
-        topic.setSlug(slug);
-
-        long id = topicService.addTopic(topic);
-        System.out.println(id == -1 ? "Fout bij toevoegen van topic." : " Topic toegevoegd met ID: " + id);
+        long id = topicController.createTopic(name, slug);
+        System.out.println(id == -1 ? "Fout bij toevoegen van topic." : "Topic toegevoegd met ID: " + id);
     }
 
-    // Toont alle topics in de console.
     private void listTopics() {
-        List<Topic> topics = topicService.getAllTopics();
+        List<Topic> topics = topicController.getAllTopics();
         if (topics.isEmpty()) {
             System.out.println("Geen topics gevonden.");
         } else {
@@ -67,44 +56,18 @@ public class TopicMenu {
         }
     }
 
-    // Werkt een bestaand topic bij op basis van ID.
     private void updateTopic() {
         int id = InputHelper.getIntInput(scanner, "ID van topic om te updaten: ");
-        boolean exists = topicService.getAllTopics().stream().anyMatch(t -> t.getId() == id);
-
-        if (!exists) {
-            System.out.println("Topic met dit ID bestaat niet.");
-            return;
-        }
-
         String name = InputHelper.getStringInput(scanner, "Nieuwe naam: ");
         String slug = InputHelper.getStringInput(scanner, "Nieuwe slug: ");
 
-        Topic topic = new Topic();
-        topic.setName(name);
-        topic.setSlug(slug);
-
-        boolean success = topicService.updateTopic(id, topic);
-        System.out.println(success ? "Topic bijgewerkt." : " Bijwerken mislukt.");
+        boolean success = topicController.updateTopic(id, name, slug);
+        System.out.println(success ? "Topic bijgewerkt." : "Bijwerken mislukt.");
     }
 
-    // Verwijdert een topic na waarschuwing en bevestiging.
     private void deleteTopic() {
         int id = InputHelper.getIntInput(scanner, "ID van topic om te verwijderen: ");
-        boolean exists = topicService.getAllTopics().stream().anyMatch(t -> t.getId() == id);
-
-        if (!exists) {
-            System.out.println("Topic met dit ID bestaat niet.");
-            return;
-        }
-
-        CascadeWarningHelper.waarschuwBijVerwijderenTopic(id, postTopicService);
-
-        if (CascadeWarningHelper.confirmDelete(scanner, "deze topic")) {
-            boolean success = topicService.deleteTopic(id);
-            System.out.println(success ? "Topic verwijderd." : " Verwijderen mislukt.");
-        } else {
-            System.out.println("Verwijderen geannuleerd.");
-        }
+        boolean success = topicController.deleteTopic(id);
+        System.out.println(success ? "Topic verwijderd." : "Verwijderen mislukt.");
     }
 }

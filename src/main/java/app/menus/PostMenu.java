@@ -1,35 +1,22 @@
 package app.menus;
 
+import app.controllers.PostController;
 import models.Post;
-import services.PostLikeService;
-import services.PostService;
-import services.PostTopicService;
-import services.UserService;
-import utils.CascadeWarningHelper;
 import utils.DisplayHelper;
 import utils.InputHelper;
 
 import java.util.List;
 import java.util.Scanner;
 
-// Menu voor het beheren van posts in het blogbeheersysteem.
 public class PostMenu {
     private final Scanner scanner;
-    private final PostService postService;
-    private final UserService userService;
-    private final PostLikeService postLikeService;
-    private final PostTopicService postTopicService;
+    private final PostController postController;
 
-    public PostMenu(Scanner scanner, PostService postService, UserService userService,
-                    PostLikeService postLikeService, PostTopicService postTopicService) {
+    public PostMenu(Scanner scanner, PostController postController) {
         this.scanner = scanner;
-        this.postService = postService;
-        this.userService = userService;
-        this.postLikeService = postLikeService;
-        this.postTopicService = postTopicService;
+        this.postController = postController;
     }
 
-    // Toont het hoofdmenu voor postsbeheer.
     public void show() {
         boolean back = false;
         while (!back) {
@@ -52,37 +39,20 @@ public class PostMenu {
         }
     }
 
-    // Voegt een nieuwe post toe na invoer van gegevens.
     private void addPost() {
         int userId = InputHelper.getIntInput(scanner, "User ID: ");
-        boolean userExists = userService.getAllUsers().stream().anyMatch(u -> u.getId() == userId);
-
-        if (!userExists) {
-            System.out.println("Kan geen post toevoegen: User ID bestaat niet.");
-            return;
-        }
-
         String title = InputHelper.getStringInput(scanner, "Titel: ");
         String slug = InputHelper.getStringInput(scanner, "Slug: ");
         String image = InputHelper.getStringInput(scanner, "Afbeelding URL: ");
         String body = InputHelper.getStringInput(scanner, "Body: ");
         boolean published = InputHelper.getBooleanInput(scanner, "Gepubliceerd? (true/false): ");
 
-        Post post = new Post();
-        post.setUserId(userId);
-        post.setTitle(title);
-        post.setSlug(slug);
-        post.setImage(image);
-        post.setBody(body);
-        post.setPublished(published);
-
-        long id = postService.addPost(post);
-        System.out.println(id == -1 ? "Fout bij toevoegen van post." : " Post toegevoegd met ID: " + id);
+        long id = postController.createPost(userId, title, slug, image, body, published);
+        System.out.println(id == -1 ? "Fout bij toevoegen van post." : "Post toegevoegd met ID: " + id);
     }
 
-    // Toont alle posts in de console.
     private void listPosts() {
-        List<Post> posts = postService.getAllPosts();
+        List<Post> posts = postController.getAllPosts();
         if (posts.isEmpty()) {
             System.out.println("Geen posts gevonden.");
         } else {
@@ -90,50 +60,21 @@ public class PostMenu {
         }
     }
 
-    // Werkt een bestaande post bij op basis van ID.
     private void updatePost() {
         int id = InputHelper.getIntInput(scanner, "ID van post om te updaten: ");
-        boolean exists = postService.getAllPosts().stream().anyMatch(p -> p.getId() == id);
-
-        if (!exists) {
-            System.out.println("Post met dit ID bestaat niet.");
-            return;
-        }
-
         String title = InputHelper.getStringInput(scanner, "Nieuwe titel: ");
         String slug = InputHelper.getStringInput(scanner, "Nieuwe slug: ");
         String image = InputHelper.getStringInput(scanner, "Nieuwe afbeelding URL: ");
         String body = InputHelper.getStringInput(scanner, "Nieuwe body: ");
         boolean published = InputHelper.getBooleanInput(scanner, "Gepubliceerd? (true/false): ");
 
-        Post post = new Post();
-        post.setTitle(title);
-        post.setSlug(slug);
-        post.setImage(image);
-        post.setBody(body);
-        post.setPublished(published);
-
-        boolean success = postService.updatePost(id, post);
-        System.out.println(success ? "Post bijgewerkt." : " Bijwerken mislukt.");
+        boolean success = postController.updatePost(id, title, slug, image, body, published);
+        System.out.println(success ? "Post bijgewerkt." : "Bijwerken mislukt.");
     }
 
-    // Verwijdert een post na waarschuwing en bevestiging.
     private void deletePost() {
         int id = InputHelper.getIntInput(scanner, "ID van post om te verwijderen: ");
-        boolean exists = postService.getAllPosts().stream().anyMatch(p -> p.getId() == id);
-
-        if (!exists) {
-            System.out.println("Post met dit ID bestaat niet.");
-            return;
-        }
-
-        CascadeWarningHelper.waarschuwBijVerwijderenPost(id, postLikeService, postTopicService);
-
-        if (CascadeWarningHelper.confirmDelete(scanner, "deze post")) {
-            boolean success = postService.deletePost(id);
-            System.out.println(success ? "Post verwijderd." : " Verwijderen mislukt.");
-        } else {
-            System.out.println("Verwijderen geannuleerd.");
-        }
+        boolean success = postController.deletePost(id);
+        System.out.println(success ? "Post verwijderd." : "Verwijderen mislukt.");
     }
 }

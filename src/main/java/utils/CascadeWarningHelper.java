@@ -27,7 +27,7 @@ public class CascadeWarningHelper {
                 .anyMatch(pt -> pt.getPostId() == postId);
 
         if (heeftLikes || heeftKoppelingen) {
-            System.out.println("⚠️ Let op: bij het verwijderen van deze post worden ook gekoppelde likes en/of topic-koppelingen automatisch verwijderd.");
+            System.out.println("Let op: bij het verwijderen van deze post worden ook gekoppelde likes en/of topic-koppelingen automatisch verwijderd.");
         }
     }
 
@@ -37,7 +37,7 @@ public class CascadeWarningHelper {
                 .anyMatch(pt -> pt.getTopicId() == topicId);
 
         if (heeftKoppelingen) {
-            System.out.println("⚠️ Let op: bij het verwijderen van deze topic worden ook gekoppelde post-topic koppelingen automatisch verwijderd.");
+            System.out.println("Let op: bij het verwijderen van deze topic worden ook gekoppelde post-topic koppelingen automatisch verwijderd.");
         }
     }
 
