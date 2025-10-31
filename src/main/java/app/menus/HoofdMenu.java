@@ -1,6 +1,6 @@
 package app.menus;
 
-import app.controllers.*;
+import controllers.*;
 import services.*;
 import utils.MenuHelper;
 

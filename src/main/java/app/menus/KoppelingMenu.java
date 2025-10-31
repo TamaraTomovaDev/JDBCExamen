@@ -1,6 +1,6 @@
 package app.menus;
 
-import app.controllers.PostTopicController;
+import controllers.PostTopicController;
 import models.PostTopic;
 import utils.DisplayHelper;
 import utils.InputHelper;

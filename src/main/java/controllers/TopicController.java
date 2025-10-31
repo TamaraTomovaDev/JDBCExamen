@@ -1,4 +1,4 @@
-package app.controllers;
+package controllers;
 
 import models.Topic;
 import services.TopicService;

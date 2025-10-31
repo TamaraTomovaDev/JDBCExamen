@@ -1,4 +1,4 @@
-package app.controllers;
+package controllers;
 
 import models.PostLike;
 import services.PostLikeService;
