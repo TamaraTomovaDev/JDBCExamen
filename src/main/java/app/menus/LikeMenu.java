@@ -1,6 +1,6 @@
 package app.menus;
 
-import controllers.PostLikeController;
+import app.controllers.PostLikeController;
 import models.PostLike;
 import utils.DisplayHelper;
 import utils.InputHelper;

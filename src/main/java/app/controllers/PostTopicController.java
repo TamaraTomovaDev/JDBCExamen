@@ -1,4 +1,4 @@
-package controllers;
+package app.controllers;
 
 import models.PostTopic;
 import services.PostTopicService;

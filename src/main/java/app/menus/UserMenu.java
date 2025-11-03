@@ -1,6 +1,6 @@
 package app.menus;
 
-import controllers.UserController;
+import app.controllers.UserController;
 import models.User;
 import utils.DisplayHelper;
 import utils.InputHelper;
